@@ -31,6 +31,7 @@ struct Stack{
 
 struct Stack cluster[N];
 
+// Initialising the side arrays to 0-empty. Will be filled with clusterID numbers as they are found during the search/navigation.
 int upSide[L]={0};
 int downSide[L]={0};
 int leftSide[L]={0};
