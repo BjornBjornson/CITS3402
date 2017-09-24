@@ -31,6 +31,11 @@ struct Stack{
 
 struct Stack cluster[N];
 
+int upSide[L]={0};
+int downSide[L]={0};
+int leftSide[L]={0};
+int rightSide[L]={0};
+
 int top = 0;
 bool popped = false;
 
@@ -247,13 +252,13 @@ void boundaries(){
 This searches on cluster of nodes,
 I've changed the return value to true if it proceeds, this will be used to let the process know that I've got another cluster to record on completion.
 */
-bool depthFirstSearch(int i, int j, int clusterID){ //the cluster ID will be the reference point for the side-arrays, and cluster sizes.
+int depthFirstSearch(int i, int j, int clusterID){ //the cluster ID will be the reference point for the side-arrays, and cluster sizes.
 	printf("reaching here3\n");
 	// initialise cluster stack
 
 	top = 0;
 	
-	if (map[i][j]->flag == 0 || map[i][j]->flag >1) return false;			// check origin flag before commencing DFS, aborting if either empty or already searched.
+	if (map[i][j]->flag == 0 || map[i][j]->flag >1) return 0;			// check origin flag before commencing DFS, aborting if either empty or already searched.
 	int count = 0;
 
 	while(!isStackEmpty()){// || !percolated(i,j)){
@@ -262,7 +267,7 @@ bool depthFirstSearch(int i, int j, int clusterID){ //the cluster ID will be the
 		//if (count >= L*L) break; //if it has already searched all nodes, it should cease work.
 		
 		if(count>N){break;}
-		count++;
+		
 		
 		//initialise temporary holding stack
 		struct Node* temp[1][1];
@@ -273,9 +278,29 @@ bool depthFirstSearch(int i, int j, int clusterID){ //the cluster ID will be the
 		
 		cluster[top].x = map[i][j]->x;				//store co-ordinates in the cluster stack
 		cluster[top].y = map[i][j]->y;
-		//================================
-		map[i][j]->flag = clusterID; 				//marking the node as both explored, and to which cluster of nodes it belongs- 
+		//================================ these switches control access to the side-record arrays=================================
+		switch(i){
+			case 0:
+				upSide[j]=clusterID;
+				break;
+			case (L-1):
+				downSide[j]=clusterID;
+				break;
+		}
+		switch(j){
+			case 0:
+				leftSide[i]=clusterID;
+				break;
+			case (L-1):
+				rightSide[i]=clusterID;
+				break;
+		}
+		if(map[i][j]->flag == 1){
+			map[i][j]->flag = clusterID; 				//marking the node as both explored, and to which cluster of nodes it belongs- 
 													//for use in both determining largest cluster and tracking the sides of the matricies
+													
+			count++; 								//will only update if there's a new filled node attached.
+		}
 		displayNode();									// print check of top node in the cluster
 		push(cluster[top].y, cluster[top].x);			// push node into the stack
 		
@@ -291,7 +316,7 @@ bool depthFirstSearch(int i, int j, int clusterID){ //the cluster ID will be the
 	for (int k = 0; k< count; k++){
 		printf("cluster[%i] = (%i, %i, %c)\n", k, cluster[k].y, cluster[k].x, cluster[k].dir);		//prints out map co-ordinate
 	}
-	return true;
+	return count;
 
 }
 
@@ -305,16 +330,16 @@ int main(int argc, char *argv[]){
     else
     {	
 	    double p = atof(argv[1]);
-		bool dfs;
+		int dfs;
 		int clusterID = 2;
 
 		seed(p);
 		printBonds();
 		
 		/*
-		===================================Here's a plan ===============================
-		If the DFS function could return its size, then the boolean becomes obsolete - size 0 means no new thing.
-		Probably have the search pattern itself edit the boundry arrays, and they can have values relating to the cluster in the places:
+		===================================New functionality ===============================
+		The DFS function return the cluster's size, so now the boolean becomes obsolete - size 0 means no new cluster.
+		Rhe search pattern itself edits the boundry arrays, and they have values relating to the cluster in the places:
 		eg. [0,2,2,0,0,0,4,4,0,5,0,2]
 		*/
 		
@@ -322,6 +347,7 @@ int main(int argc, char *argv[]){
 		I'm also thinking on how to deal with internal nodes. we may end up checking the entire grid anyway to possibly find the largest cluster, rather than just the edges.
 		On the other hand, once lim->(infinity) the likelihood of an internal cluster being the largest (compared to mulit-frame spanning clusters) approaches 0.
 		On the third, mutant hand, as p-> 0 the likelyhood gets larger, since the filled nodes get more sparse
+		So the current build will search every square for an un-searched node.
 		*/
 		
 		for(int j =0; j<L; j++){
@@ -329,20 +355,30 @@ int main(int argc, char *argv[]){
 				printf("%i, %i\n", j,i);
 				dfs = depthFirstSearch(j,i, clusterID);
 				printf("dfs origin = %s\n", dfs ? "true" : "false");
-				if(dfs){
+				if(dfs>0){
 					clusterID++;
 				}
 			}
 		}
 		printBonds();
-
-		/*for (int i = 0; i < L; i++){		//DFS of all rows from the left edge
-			depthFirstSearch(i,0);
+		printf("TOP LNE: ");
+		for(int i=0;i<L;i++){
+			printf("%i  ", upSide[i]);
 		}
+		printf("\nBOTTOM LINE: ");
+		for(int i=0;i<L;i++){
+			printf("%i  ", downSide[i]);
+		}
+		printf("\nLEFT SIDE: ");
+		for(int i=0;i<L;i++){
+			printf("%i  ", leftSide[i]);
+		}
+		printf("\nRIGHT SIDE: ");
+		for(int i=0;i<L;i++){
+			printf("%i  ", rightSide[i]);
+		}
+		printf("\n");
 
-		for (int j = 0; j < L; j++){		//DFS of all columns from the top edge
-			depthFirstSearch(0,j);
-		}*/
 
 
 		return 0;
