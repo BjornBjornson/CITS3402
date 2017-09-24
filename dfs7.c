@@ -8,7 +8,7 @@
 //  compile:  gcc -std=c99 -Wall -Werror -o percolate percolate.c
 //  run:      ./percolate probability
 
-#define L 6        	/* Linear edge dimension of map */
+#define L 6     	/* Linear edge dimension of map */
 #define N L*L		// total number of nodes in a single map
 
 struct Node {
@@ -90,8 +90,8 @@ void printBonds(){
 	int i,j;
 	for (i = 0; i < (L); i++){
 		for (j = 0; j < L; j++){
-			if (map[i][j]->flag==1){
-				if (map[i][(j+1)%L]->flag == 1) printf("%i ----- ", map[i][j]->flag);
+			if (map[i][j]->flag>0){
+				if (map[i][(j+1)%L]->flag > 0) printf("%i ----- ", map[i][j]->flag);
 				else printf("%i\t", map[i][j]->flag);
 			}
 			else printf("%i\t", map[i][j]->flag);
@@ -99,9 +99,9 @@ void printBonds(){
 		}
 		printf("\n");
 		for (j = 0; j < L; j++){
-			if (map[i][j]->flag==1){
+			if (map[i][j]->flag>0){
 	
-				if (map[(i+1)%L][j]->flag == 1) printf("|\t");
+				if (map[(i+1)%L][j]->flag >0) printf("|\t");
 				else printf("\t");
 			}
 			else printf("\t");
@@ -161,7 +161,8 @@ struct Node * getNextNode() {
 	// note that I have not assumed the lattice can cycle around itself as I think we want to retain edge nodes
 	// assuming it's a small part of a larger area - can change this easily with %L if required
 		
-
+	
+	
 		if ((i+1 < L) && map[i+1][j]->flag == 1 && map[i+1][j]->up == 0) {
 				cluster[top].dir = 'd';		
 				map[i][j]->down = 1;
@@ -246,13 +247,13 @@ void boundaries(){
 This searches on cluster of nodes,
 I've changed the return value to true if it proceeds, this will be used to let the process know that I've got another cluster to record on completion.
 */
-bool depthFirstSearch(int i, int j/*, int clusterID*/){ //the cluster ID will be the reference point for the side-arrays, and cluster sizes.
+bool depthFirstSearch(int i, int j, int clusterID){ //the cluster ID will be the reference point for the side-arrays, and cluster sizes.
 	printf("reaching here3\n");
 	// initialise cluster stack
 
 	top = 0;
 	
-	if (map[i][j]->flag == 0 /*|| map[i][j]->flag >1*/) return false;			// check origin flag before commencing DFS, aborting if either empty or already searched.
+	if (map[i][j]->flag == 0 || map[i][j]->flag >1) return false;			// check origin flag before commencing DFS, aborting if either empty or already searched.
 	int count = 0;
 
 	while(!isStackEmpty()){// || !percolated(i,j)){
@@ -260,7 +261,7 @@ bool depthFirstSearch(int i, int j/*, int clusterID*/){ //the cluster ID will be
 		// include counter until percolation function finished
 		//if (count >= L*L) break; //if it has already searched all nodes, it should cease work.
 		
-		if(count>30)
+		if(count>N){break;}
 		count++;
 		
 		//initialise temporary holding stack
@@ -273,7 +274,7 @@ bool depthFirstSearch(int i, int j/*, int clusterID*/){ //the cluster ID will be
 		cluster[top].x = map[i][j]->x;				//store co-ordinates in the cluster stack
 		cluster[top].y = map[i][j]->y;
 		//================================
-		//map[i][j]->flag = clusterID; 				//marking the node as both explored, and to which cluster of nodes it belongs- 
+		map[i][j]->flag = clusterID; 				//marking the node as both explored, and to which cluster of nodes it belongs- 
 													//for use in both determining largest cluster and tracking the sides of the matricies
 		displayNode();									// print check of top node in the cluster
 		push(cluster[top].y, cluster[top].x);			// push node into the stack
@@ -305,18 +306,35 @@ int main(int argc, char *argv[]){
     {	
 	    double p = atof(argv[1]);
 		bool dfs;
-		/*int clusterID = 2;*/
+		int clusterID = 2;
 
 		seed(p);
 		printBonds();
-		for(int i =0; i<L; i++){
-			printf("%i", i);
-			dfs = depthFirstSearch(i,0/*, clusterID*/);
-			printf("dfs origin = %s\n", dfs ? "true" : "false");
-			/*if(dfs){
-				clusterID++;
-			}*/
+		
+		/*
+		===================================Here's a plan ===============================
+		If the DFS function could return its size, then the boolean becomes obsolete - size 0 means no new thing.
+		Probably have the search pattern itself edit the boundry arrays, and they can have values relating to the cluster in the places:
+		eg. [0,2,2,0,0,0,4,4,0,5,0,2]
+		*/
+		
+		/*furthermore:
+		I'm also thinking on how to deal with internal nodes. we may end up checking the entire grid anyway to possibly find the largest cluster, rather than just the edges.
+		On the other hand, once lim->(infinity) the likelihood of an internal cluster being the largest (compared to mulit-frame spanning clusters) approaches 0.
+		On the third, mutant hand, as p-> 0 the likelyhood gets larger, since the filled nodes get more sparse
+		*/
+		
+		for(int j =0; j<L; j++){
+			for(int i =0; i<L; i++){
+				printf("%i, %i\n", j,i);
+				dfs = depthFirstSearch(j,i, clusterID);
+				printf("dfs origin = %s\n", dfs ? "true" : "false");
+				if(dfs){
+					clusterID++;
+				}
+			}
 		}
+		printBonds();
 
 		/*for (int i = 0; i < L; i++){		//DFS of all rows from the left edge
 			depthFirstSearch(i,0);
