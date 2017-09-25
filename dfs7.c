@@ -8,8 +8,33 @@
 //  compile:  gcc -std=c99 -Wall -Werror -o percolate percolate.c
 //  run:      ./percolate probability
 
-#define L 6     	/* Linear edge dimension of map */
+#define L 10     	/* Linear edge dimension of map */
 #define N L*L		// total number of nodes in a single map
+
+/*
+================================== Some notes ====================================
+Things we'd definitely want:
+1) a variable to hold the largest cluster size (and it's ID) (in the local search area)- for fast comparison during search
+2) variables to hold the size of each of the edge-touching clusters
+*/
+
+
+/*
+================================== A possible way to progress in serialisation ====================================
+I'm thinking that having each thread on each computer in the network writing into its own file when they find new clusters might be a way to go.
+We could split up the grid into parts, using a master-slave type arrangement of the network processors.
+Each sub-processor then further splits their part of the grid into peices for the various threads to handle.
+Each thread saves the information to a thread-specific file something like: 
+char[12] file_name;
+strcpy(file_name, "threadX.csv");
+file_name[5] = (char)MPI_THREAD_NUM;
+then the files can be read and collated at the end of the process, and the applicable data sent bck to the master node for proccessing
+*/
+
+int upSide[L]={0};
+int downSide[L]={0};
+int leftSide[L]={0};
+int rightSide[L]={0};
 
 struct Node {
 	int flag;			// occupied=1, unoccupied=0, already in a cluster=2+
@@ -23,6 +48,20 @@ struct Node {
 
 struct Node* map[L][L];
 
+// just a helper function for while I'm testing the matrix connection sequence
+void clearMap(){
+	for(int i=0; i<L;i++){
+		for(int j=0;j<L;j++){
+			map[i][j]->flag =0;
+			map[i][j]->up=0;
+			map[i][j]->down=0;
+			map[i][j]->left=0;
+			map[i][j]->right=0;
+			map[i][j]->x=0;
+			map[i][j]->y=0;
+		}
+	}
+}
 struct Stack{
 	int x;
 	int y;
@@ -32,10 +71,7 @@ struct Stack{
 struct Stack cluster[N];
 
 // Initialising the side arrays to 0-empty. Will be filled with clusterID numbers as they are found during the search/navigation.
-int upSide[L]={0};
-int downSide[L]={0};
-int leftSide[L]={0};
-int rightSide[L]={0};
+
 
 int top = 0;
 bool popped = false;
@@ -261,7 +297,6 @@ int depthFirstSearch(int i, int j, int clusterID){ //the cluster ID will be the 
 	
 	if (map[i][j]->flag == 0 || map[i][j]->flag >1) return 0;			// check origin flag before commencing DFS, aborting if either empty or already searched.
 	int count = 0;
-
 	while(!isStackEmpty()){// || !percolated(i,j)){
 
 		// include counter until percolation function finished
@@ -333,7 +368,7 @@ int main(int argc, char *argv[]){
 	    double p = atof(argv[1]);
 		int dfs;
 		int clusterID = 2;
-
+		int cluster_set[1+N/2]={0};
 		seed(p);
 		printBonds();
 		
@@ -357,31 +392,87 @@ int main(int argc, char *argv[]){
 				dfs = depthFirstSearch(j,i, clusterID);
 				printf("dfs origin = %s\n", dfs ? "true" : "false");
 				if(dfs>0){
+					cluster_set[clusterID-2]=dfs;
 					clusterID++;
 				}
 			}
 		}
 		printBonds();
+		/*
+		================================== Expository text ===============================
+		Using the next bit to a) show that it's processed correctly and b) set it up to try connecting two matrix results at the end
+		*/
 		printf("TOP LNE: ");
+		int net1Up[L];
+		int net1Down[L];
+		int net1Left[L];
+		int net1Right[L];
 		for(int i=0;i<L;i++){
-			printf("%i  ", upSide[i]);
+			
+			net1Up[i]=upSide[i];
+			printf("%i  ", net1Up[i]);
 		}
 		printf("\nBOTTOM LINE: ");
 		for(int i=0;i<L;i++){
-			printf("%i  ", downSide[i]);
+			net1Down[i]=downSide[i];
+			printf("%i  ", net1Down[i]);
 		}
 		printf("\nLEFT SIDE: ");
 		for(int i=0;i<L;i++){
-			printf("%i  ", leftSide[i]);
+			net1Left[i]=leftSide[i];
+			printf("%i  ", net1Left[i]);
 		}
 		printf("\nRIGHT SIDE: ");
 		for(int i=0;i<L;i++){
 			printf("%i  ", rightSide[i]);
+			net1Right[i]=net1Right[i];
 		}
 		printf("\n");
-
-
-
+		printf("CLUSTER SIZES:  ");
+		int a =0;
+		while(cluster_set[a]!=0){
+			printf("%i, ",cluster_set[a]);
+			a++;
+		}
+		printf("\n");
+		int network1[1+N/2] = {0};
+		for(int j=0; j<a;j++){
+			network1[j]=cluster_set[j];
+			cluster_set[j]=0;
+			printf("%i, ",network1[j]);
+		}
+		printf("\n");
+		clearMap();
+		seed(p);
+		printBonds();
+		for(int j =0; j<L; j++){
+			for(int i =0; i<L; i++){
+				printf("%i, %i\n", j,i);
+				dfs = depthFirstSearch(j,i, clusterID);
+				printf("dfs origin = %s\n", dfs ? "true" : "false");
+				if(dfs>0){
+					cluster_set[clusterID-2]=dfs;
+					clusterID++;
+				}
+			}
+		}
+		printBonds();
+		/*
+		paused to think over how to approach the problem of maintaining unique IDs and how to concatenate the outside arrays with replacement systems
+		
+		Possibly work through the connection points first, edit the numerals, then re-draw the outside boarders.
+		*/
+		int entire_bottom[2*L]={0};
+		int entire_top[2*L]={0};
+		int entire_left[2*L]={0};
+		int entire_right[2*L]={0};
+		int total_clusters=0;
+		
+		for(int i=0; i<L; i++){
+			entire_bottom[i]=net1Down[i];
+			entire_top[i]=net1Up[i];
+		}
+		
 		return 0;
     }
 }
