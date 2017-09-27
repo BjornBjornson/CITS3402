@@ -265,7 +265,7 @@ int depthFirstSearch(int i, int j, int clusterID){
 		// include counter until percolation function finished
 		//if (count >= L*L) break; //if it has already searched all nodes, it should cease work.
 		
-		if(count>N){break;}			//note this will never exceed N unless probability==1 --- redundant?
+		//if(count>N){break;}			//note this will never exceed N unless probability==1 --- redundant?
 		
 		
 		//initialise temporary holding stack
@@ -303,8 +303,8 @@ int depthFirstSearch(int i, int j, int clusterID){
 			map[i][j]->flag = clusterID; 		
 				//marking the node as both explored, and to which cluster of nodes it belongs- 
 				//for use in both determining largest cluster and tracking the sides of the matricies
-			rowPerc[i] = clusterID;						//store record of which row and column cluster reaches
-			columnPerc[j] = clusterID;
+			//rowPerc[i] = clusterID;						//store record of which row and column cluster reaches
+			//columnPerc[j] = clusterID;
 			count++; 						//will only update if there's a new filled node attached.
 											
 		}
@@ -365,6 +365,8 @@ int main(int argc, char *argv[]){
 			for(int i =0; i<L; i++){
 				//printf("%i, %i\n", j,i);
 				dfs = depthFirstSearch(j,i, clusterID);
+				row = 'y';
+				column = 'y';
 				if(dfs>0){
 					// the following determines if the cluster has percolated over rows and/or columns and records details for each cluster 
 					for (int n=0; n<L; n++){
@@ -372,7 +374,7 @@ int main(int argc, char *argv[]){
 						if (columnPerc[n]==0) column = 'n';
 					}
 					perc[clusterID-2].ID = clusterID;
-					perc[clusterID-2].size = count;
+					perc[clusterID-2].size = dfs;
 					perc[clusterID-2].rows = row;
 					perc[clusterID-2].cols = column;
 
