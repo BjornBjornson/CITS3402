@@ -328,7 +328,73 @@ int depthFirstSearch(int i, int j, int clusterID){
 
 }
 
-void side_matcher(/*two searches worth of data*/){
+void cluster_combiner(/*two searches worth of data*/){
+	/*
+	for ease of understanding: consider it set A and set B.
+	Treating set A preferentially because it makes an easy convention.
+	code logic:
+	int numSupers =0; //will hold the number of created superclusters (will get to that in a moment)
+	create new int[L]. <supercluster hence forth>.   the lowest indexed connected supercluster 
+	
+	two arrays <linkArrays> (A[], B[]) to hold supercluster links from each of the old cluster arrays. - make each size(N/2) so they can be indexed by original ID?
+	
+	
+	afterwards will just append any un-rebound clusters at a new, sequential cluster ID.
+	go through the paired side-arrays:
+		if two non-zero matches:
+			check set A&B- 
+				neither has supercluster (even if one is an empty node): make new supercluster with a value the same as it's index, give both A&B the supercluster's index.
+				if only one is has a binding: Follow the superclusters: i=supercluster[X] while X!=i {keep searching} give final value to new binding.
+				in both bound to superclusters: 
+					Check both superclusters: if value!= index ->
+					create a temporary int array for each set. size L should do it.
+					check supercluster[index] until value== index on each side. use the temp arrays to store the index steps that were needed.
+					If they're already connected: should end up with the same number. 
+					Otherwise: set the lower of the two numbers as int temp_id
+					By doing this Every time it should keep the actual time spent doing this relatively short, since any long chains will be turned into short ones very quickly.
+					<this bit could be parralelised>
+					int i=0;
+					while(temp_arrayA[i]){
+						A[temp_arrayA[i]]=temp_id;
+						i++;
+					}
+					i=0;
+					while(temp_arrayB[i]){
+						B[temp_arrayB[i]]=temp_id;
+						i++;
+					}
+		
+		At this stage it should have a pair of linkArrays with either NULL or an int.
+		
+		int count=0;
+		struct cluster new_clusters[some_size];
+		for each item in linkArray A then B: //
+			if item (ie, !=NULL){
+				int new_id= <find terminating supercluster number> -should be quick
+				for each in old_side:
+				new_side=new_id; <for every side>
+				new_clusters->size += old_clusters[item.id]->size;
+				if new_clusters[item.index]{
+					if(id!=index){
+						count++;
+						new_clusters[count]=new_clusters[item.index];
+						new_clusters[item.index]=item;
+					}else{
+						new_clusters[item.index]->size +=item.size;
+					}
+				}else{
+					new_clusters[count]=item;
+					count++;
+				}
+			}else{
+				new_clusters[count]=old_clusters[item.index];
+				count++;
+			}
+			
+		
+		
+	
+	*/
 	
 }
 
