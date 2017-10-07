@@ -89,11 +89,11 @@ int main(int argc, char *argv[]){
 				superSize[j]++;
 				//add the sizes together here
 			}
-			else if(A[SA[i]-2]!=-1 &&B[SB[i]-2]!=-1){
+			else if(A[SA[i]-2]!=-1 &&B[SB[i]-2]!=-1){ //======Helper function start
 				printf("both have superclusters\n");
 				int j =B[SB[i]-2];
-				int updateB[L/2];
-				int updateA[L/2];
+				int updateB[L];
+				int updateA[L];
 				int countB=0;
 				while(superclusters[j]!=j){
 					countB++;
@@ -107,7 +107,7 @@ int main(int argc, char *argv[]){
 					countA++;
 					updateA[countA]=k;
 					k=superclusters[k];
-				}
+				}// ==========================================helper function end
 				// Now able to see if they have the same root cluster.
 				//going to congregate to the lowest numbered clusters, since they'll be older-> more likely to be the root of a bunch of other clusters.
 				if(j<k){
