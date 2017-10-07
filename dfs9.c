@@ -327,8 +327,44 @@ int depthFirstSearch(int i, int j, int clusterID){
 	return count;
 
 }
+/*
+will probably have to prepare some sort of thing to figure out how large the box will end up, and prepare memory locations for the side arrays.
+also: since it wraps around on both sides, keeping track of the span is more important. Bother. Might be easier to quietly ignore the vertical wraparound.
+*/
 
-void cluster_combiner(/*two searches worth of data*/){
+/*
+some sort of for loop determined in master core, using the size of the unit to split up the grid with a pair of for loops: 
+these loops can be used to determine which section of edge will be used for comparison next. Might be able to do this in quadrants too. 
+So the four threads on the master can independantly proccess incoming data, and then have a big mash-together at the end.
+
+*/
+void cluster_combiner(){
+	int A[5]; //must remember to check existance while looping through this. will cause errors otherwise.
+	int B[5];
+	int SA[L]={2,0,2,0,0,3,3,0,3,3};// having these as non-pointers will be faster, and probably possible, since they're pretty small.
+	int SB[L]={4,4,0,2,2,0,3,0,5,5};
+	int numSupers =0;
+	int superclusters[L]={0};
+	int superSize[L];
+	for(int i=0;i<L;i++){
+		if(SA[i]!=0 && SB[i]!=0){ //if neither side is empty
+			if(!A[SA[i]-2]&&!B[SB[i]-2]){ //if neither side's super-link list position exists yet. (hopefully)
+				A[numSupers]=numSupers;
+				B[numSupers]=numSupers;
+				superclusters[numSupers]=numSupers; //referencing itself, meaning that it hasn't been linked to another cluster yet.
+				superSize[numSupers]=1; //will get to recording proper sizes later in development
+				numSupers++;
+			}else if((A[SA[i]-2]&&!B[SB[i]-2])||(!A[SA[i]-2]&&B[SB[i]-2]))
+			int working =1;
+			int update[L]={0}; //going to be used to keep the dependency chains as short as possible.
+			
+		}else if(SA[i]!=0){
+			//check for supercluster, add one if missing
+		}else if(SB[i]!=0){
+			//ditto
+		}
+		//else ignore;
+	}
 	/*
 	for ease of understanding: consider it set A and set B.
 	Treating set A preferentially because it makes an easy convention.
@@ -336,7 +372,7 @@ void cluster_combiner(/*two searches worth of data*/){
 	int numSupers =0; //will hold the number of created superclusters (will get to that in a moment)
 	create new int[L]. <supercluster hence forth>.   the lowest indexed connected supercluster 
 	
-	two arrays <linkArrays> (A[], B[]) to hold supercluster links from each of the old cluster arrays. - make each size(N/2) so they can be indexed by original ID?
+	two arrays <linkArrays> (A[], B[]) to hold supercluster links from each of the old cluster arrays. - make each size(N/2) so they can be indexed by original ID? possibly use calloc/pointers. dynamic arrays woo.
 	
 	
 	afterwards will just append any un-rebound clusters at a new, sequential cluster ID.
