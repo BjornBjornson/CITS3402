@@ -82,13 +82,11 @@ int combi(/*int *(AA[L]), int *(BB[L]), int highest_id*/){ //tried to wrangle it
 
 	
 	
-	//int link_A[L]={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}; //must remember to check existance while looping through this. will cause errors otherwise.
-	//int link_B[L]={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+	
 	int SA[L]={2,0,0,0,2,0,3,0,3,3};// having these as non-pointers will be faster, and probably possible, since they're pretty small.
 	int SB[L]={4,4,0,2,2,0,3,0,5,5};
 	int numSupers =highest_id+1;
-	//int superclusters[L]={0};
-	//int superSize[L];
+	
 	printf("Starting\n");
 	for(int i=0;i<L;i++){
 		printf("\n\n%i:i\n",i);
@@ -299,7 +297,7 @@ int combi(/*int *(AA[L]), int *(BB[L]), int highest_id*/){ //tried to wrangle it
 		//free(A);
 		//free(B);
 	}
-	printf("GOT HERE\n");
+	printf("\n New Side A\n");
 	
 	//all of this is going to rely on ID's remaining unique, and just iterating upwards.
 
@@ -314,7 +312,7 @@ int combi(/*int *(AA[L]), int *(BB[L]), int highest_id*/){ //tried to wrangle it
 		}
 		
 	}
-	printf("\n");
+	printf("\n New Side B\n");
 	for(int Z=0; Z<L;Z++){
 		struct cluster *my_super;
 		if(SB[Z]==0){
@@ -326,8 +324,7 @@ int combi(/*int *(AA[L]), int *(BB[L]), int highest_id*/){ //tried to wrangle it
 		
 	}
 	printf("\n");
-	//adding the new clusters to the larger map. //will need to delete the old ones too though
-	printf("HERE TOO\n");
+	
     for(int Z=0; Z<L;Z++){
 		
 		
@@ -356,7 +353,7 @@ int combi(/*int *(AA[L]), int *(BB[L]), int highest_id*/){ //tried to wrangle it
 			printf("ZERO\n");
 		}*/
 		
-    }printf("\n -=============----- \n");
+    }printf("\n I made the following sides to demonstrate the update proceedure. \n A1-{2,0,0,0,2,0,3,0,3,3}\nA2-{2,0,2,0,3,0,3,0,4,4}\nA3-{4,0,5,0,6,0,7,0,3,3}\n");
 	
 	// Now going through the original side-list and updating all other side-list information. Then going to remove old entry from the all_clusters hashmap.
 	
