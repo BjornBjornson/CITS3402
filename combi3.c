@@ -12,6 +12,9 @@ int lowest(int *clusters, int *map){
 	//remember to unbind all temporary pointers 
 	return 1;
 }*/
+struct grid_Side{
+	int placeholder;
+};
 struct cluster{
 	int id;
 	//char source;
@@ -52,7 +55,19 @@ void updater(int j, int count, int *update, struct cluster **superclusters){
 	}
 	
 }
-
+void side_update(int *side, struct cluster **refMap, struct cluster **superclusters){
+	for(int Z =0; Z<L;Z++){ // you can see that this should be iterated across all sides.
+		struct cluster *link;
+		HASH_FIND_INT(*refMap, &side[Z], link);
+		if(link!=NULL){
+			while(link->parent!=link->id){
+			int start = link->parent;
+			HASH_FIND_INT(*superclusters, &start, link);
+			}
+			side[Z]=link->id;
+		}
+	}
+}
 //void add_cluster()
 
 int combi(){
@@ -61,14 +76,10 @@ int combi(){
 	struct cluster *link_A = NULL;
 	struct cluster *link_B = NULL;
 	struct cluster *superclusters = NULL;
-	/*int A1[L]={2,0,0,0,2,0,3,0,3,3};
-	int A2[L]={2,0,2,0,3,0,3,0,4,4};
-	int A3[L]={4,0,5,0,6,0,7,0,3,3};
-	
-	int B1[L]={4,4,0,2,2,0,3,0,5,5};
-	int B2[L]={2,0,3,0,4,0,5,0,6,6};
-	int B3[L]={4,4,0,5,5,0,6,6,0,7};*/
-	
+	int AA[3][L]={{2,0,0,0,2,0,3,0,3,3},{2,0,2,0,3,0,3,0,4,4},{4,0,5,0,6,0,7,0,3,3}};
+
+	int BB[3][L]={{4,4,0,2,2,0,3,0,5,5},{2,0,3,0,4,0,5,0,6,6},{4,4,0,5,5,0,6,6,0,7}};
+
 	
 	
 	//int link_A[L]={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}; //must remember to check existance while looping through this. will cause errors otherwise.
@@ -117,6 +128,7 @@ int combi(){
 				printf("-1,");
 			}
 		}printf("\n");
+		
 		for(int Z=0; Z<L;Z++){
 			HASH_FIND_INT(superclusters, &Z, older);
 			if(older){
@@ -142,10 +154,12 @@ int combi(){
 				struct cluster *newSuperA;
 				newSuperA = malloc(sizeof(struct cluster));
 				newSuperA->id=SA[i];
+				newSuperA->parent = numSupers;
 				HASH_ADD_INT(link_A, id, newSuperA);
 				struct cluster *newSuperB;
 				newSuperB = malloc(sizeof(struct cluster));
 				newSuperB->id=SB[i];
+				newSuperB->parent = numSupers;
 				HASH_ADD_INT(link_B, id, newSuperB);
 				numSupers++;
 			}
@@ -166,7 +180,7 @@ int combi(){
 				}
 				struct cluster *old;
 				old=malloc(sizeof(struct cluster));
-				old->parent=A->parent;
+				old->parent=j;
 				old->id=SB[i];
 				HASH_ADD_INT(link_B, id, old);
 				
@@ -181,17 +195,20 @@ int combi(){
 				int j =lowest_num(temp, &count, update, &superclusters);
 				
 				if(count!=0){
-					
+					struct cluster *old;
 					updater(j, count, update, &superclusters);
-					B->parent=j;
+					
+					HASH_FIND_INT(link_B,&B->id, old);
+					old->parent=j;
 					
 				}
 				struct cluster *old;
 				old=malloc(sizeof(struct cluster));
+				old->id=SA[i];
 				old->parent=j;
 				old->size=B->size+1;
 				HASH_ADD_INT(link_A, id, old);
-				free(old);
+				//free(old);
 				//add the sizes together here
 			}
 			else if(A&&B){ //fix this up.
@@ -251,8 +268,11 @@ int combi(){
 			newSuper->parent= numSupers;
 			newSuper->size = 1;
 			HASH_ADD_INT(superclusters, id, newSuper);
-			newSuper->id=SA[i];
-			HASH_ADD_INT(link_A, id, newSuper);
+			struct cluster *newSuperB;
+			newSuperB = malloc(sizeof(struct cluster));
+			newSuperB->id=SA[i];
+			newSuperB->parent = numSupers;
+			HASH_ADD_INT(link_A, id, newSuperB);
 			//free(newSuper);
 			numSupers++;
 		}
@@ -279,39 +299,123 @@ int combi(){
 		//free(A);
 		//free(B);
 	}
+	printf("GOT HERE\n");
 	
 	//all of this is going to rely on ID's remaining unique, and just iterating upwards.
-	
-	struct cluster *iterator;
-	struct cluster *my_super;
-	struct cluster *comparison;
-	//adding the new clusters to the larger map.
-	HASH_ITER(hh, superclusters, my_super, iterator){ //this loop uses iterator to track the next item in the map
-		while(my_super->id != my_super->parent){
-			HASH_FIND_INT(superclusters, &my_super->parent, my_super);
+	if(numSupers>1){
+		struct cluster *test;
+		int git =112;
+		HASH_FIND_INT(superclusters, &git, test);
+		if(test){
+			printf("TEST TEST TEST  %i\n",test->parent);
 		}
-		HASH_FIND_INT(all_clusters, &my_super->id, comparison);
-		if(comparison==NULL){
-			HASH_ADD_INT(all_clusters, id, my_super);
-			if(my_super->id>highest_id){
-				highest_id=my_super->id;
-			}
+	}
+	//return 1;
+	for(int Z=0; Z<L;Z++){
+		struct cluster *my_super;
+		if(SA[Z]==0){
+			printf("000,");
 		}else{
-			printf("ERROR cluster ID EXISTS\n RECHECK THE ID PROVISIONING CODE");
+			HASH_FIND_INT(link_A, &SA[Z], my_super);
+			printf("%i,",my_super->parent);
 		}
-		
-	}printf("\n -=============----- \n");
-	
-	// Now going through the original side-list and updating all other side-list information. Then going to remove old entry from the all_clusters hashmap.
-	HASH_ITER(hh, link_A, my_super, iterator){
 		
 	}
-	/*going to
-	-go through constructed superclusters, and add them to
-	-
+	printf("\n");
+	for(int Z=0; Z<L;Z++){
+		struct cluster *my_super;
+		if(SB[Z]==0){
+			printf("000,");
+		}else{
+			HASH_FIND_INT(link_B, &SB[Z], my_super);
+			printf("%i,",my_super->parent);
+		}
+		
+	}
+	printf("\n");
+	//adding the new clusters to the larger map. //will need to delete the old ones too though
+	printf("HERE TOO\n");
+    for(int Z=0; Z<L;Z++){
+		
+		
+		if(SA[Z]!=0){
+			struct cluster *my_super;
+			struct cluster *comparison;
+			HASH_FIND_INT(link_A, &SA[Z], my_super);
+			int start = my_super->parent;
+			int count= 0;
+			int update[L];
+			int j = lowest_num(start, &count, update, &superclusters);
+			HASH_FIND_INT(all_clusters, &j, comparison);
+			if(comparison==NULL){
+				struct cluster *temp;
+				temp=malloc(sizeof(struct cluster));
+				temp->id = my_super->id;
+				temp->parent = my_super->parent;
+				HASH_ADD_INT(all_clusters, id, temp);
+				if(temp->id>highest_id){
+					highest_id=temp->id;
+				}
+			}/*else{
+				printf("DON'T WORRY, IT SHOULD GET THIS ON CHILD NODES\n");
+			}*/
+		}/*else{
+			printf("ZERO\n");
+		}*/
+		
+    }printf("\n -=============----- \n");
 	
+	// Now going through the original side-list and updating all other side-list information. Then going to remove old entry from the all_clusters hashmap.
 	
+	/*
+	reminder of the other sides (dummy data)
+	int A1[L]={2,0,0,0,2,0,3,0,3,3};
+	int A2[L]={2,0,2,0,3,0,3,0,4,4};
+	int A3[L]={4,0,5,0,6,0,7,0,3,3};
+	)
 	*/
+	
+	
+	for(int Z =0; Z<3;Z++){ //edit this to be based on the size, rather than a hard-variable.
+		side_update(AA[Z], &link_A, &superclusters);
+		side_update(BB[Z], &link_B, &superclusters);
+	}
+	printf("\n");
+	for(int Z =0; Z<3;Z++){ //edit this to be based on the size, rather than a hard-variable.
+		for(int Y=0; Y<L;Y++){
+			printf("%i,",AA[Z][Y]);
+		}printf("\n");
+	}
+	printf("\n");
+	printf("NOW B\n");
+	for(int Z =0; Z<3;Z++){ //edit this to be based on the size, rather than a hard-variable.
+		for(int Y=0; Y<L;Y++){
+			printf("%i,",BB[Z][Y]);
+		}printf("\n");
+	}
+	
+	for(int Z=0; Z<L;Z++){//freeing up unused memory
+		struct cluster *mid;
+		HASH_FIND_INT(link_A, &SA[Z], mid);
+		if(mid){
+			HASH_FIND_INT(all_clusters, &mid->id, mid);
+			if(mid){
+				HASH_DEL(all_clusters, mid);
+				free(mid);
+			}
+			HASH_FIND_INT(link_A, &SA[Z], mid);
+			HASH_DEL(link_A, mid);
+			free(mid);
+		}
+		HASH_FIND_INT(link_B, &SB[Z], mid);
+		if(mid){
+			HASH_DEL(link_B, mid);
+			free(mid);
+		}
+	}
+	free(link_A);
+	free(link_B);
+	free(superclusters);
 	
 	return 1;
 	
