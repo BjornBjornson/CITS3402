@@ -80,8 +80,10 @@ int combi(/*int *(AA[L]), int *(BB[L]), int highest_id*/){ //tried to wrangle it
 
 	int BB[3][L]={{4,4,0,2,2,0,3,0,5,5},{2,0,3,0,4,0,5,0,6,6},{4,4,0,5,5,0,6,6,0,7}};
 
-	
-	
+	/*
+		For melding the second face, don't increase cluster numbering. shuffle everything down to the lowest cluster, and update the sides after that- 
+		since there will be constant values, it's not the same problem scenario as with two un-related squares
+		*/
 	
 	int SA[L]={2,0,0,0,2,0,3,0,3,3};// having these as non-pointers will be faster, and probably possible, since they're pretty small.
 	int SB[L]={4,4,0,2,2,0,3,0,5,5};
@@ -168,7 +170,7 @@ int combi(/*int *(AA[L]), int *(BB[L]), int highest_id*/){ //tried to wrangle it
 				int temp = A->parent;
 				int j =lowest_num(temp, &count, update, &superclusters);
 				
-				if(count!=0){//=====helper 2
+				if(count!=0){
 					struct cluster *old;
 					updater(j, count, update, &superclusters);
 					
@@ -206,10 +208,10 @@ int combi(/*int *(AA[L]), int *(BB[L]), int highest_id*/){ //tried to wrangle it
 				old->parent=j;
 				old->size=B->size+1;
 				HASH_ADD_INT(link_A, id, old);
-				//free(old);
+				\
 				//add the sizes together here
 			}
-			else if(A&&B){ //fix this up.
+			else if(A&&B){ 
 				printf("both have superclusters\n");
 				int countA =0;
 				int countB=0;
@@ -224,7 +226,7 @@ int combi(/*int *(AA[L]), int *(BB[L]), int highest_id*/){ //tried to wrangle it
 
 				// Now able to see if they have the same root cluster.
 				//going to congregate to the lowest numbered clusters, since they'll be older-> more likely to be the root of a bunch of other clusters.
-				if(j>k){//need to work this and below over again =====================================
+				if(j>k){\
 					struct cluster *child;
 					struct cluster *parent;
 					HASH_FIND_INT(superclusters, &k, parent);
@@ -346,9 +348,9 @@ int combi(/*int *(AA[L]), int *(BB[L]), int highest_id*/){ //tried to wrangle it
 				if(temp->id>highest_id){
 					highest_id=temp->id;
 				}
-			}/*else{
-				printf("DON'T WORRY, IT SHOULD GET THIS ON CHILD NODES\n");
-			}*/
+			}else{
+				//will need to update the size value of the cluster, because it will have been combined with other, newer clusters.
+			}
 		}/*else{
 			printf("ZERO\n");
 		}*/
@@ -393,12 +395,23 @@ int combi(/*int *(AA[L]), int *(BB[L]), int highest_id*/){ //tried to wrangle it
 				HASH_DEL(all_clusters, mid);
 				free(mid);
 			}
+			HASH_FIND_INT(superclusters, &mid->id, mid);
+			if(mid){
+				HASH_DEL(superclusters, mid);
+				free(mid);
+			}
 			HASH_FIND_INT(link_A, &SA[Z], mid);
 			HASH_DEL(link_A, mid);
 			free(mid);
 		}
 		HASH_FIND_INT(link_B, &SB[Z], mid);
 		if(mid){
+			HASH_FIND_INT(superclusters, &mid->id, mid);
+			if(mid){
+				HASH_DEL(superclusters, mid);
+				free(mid);
+			}
+			HASH_FIND_INT(link_B, &SB[Z], mid);
 			HASH_DEL(link_B, mid);
 			free(mid);
 		}
