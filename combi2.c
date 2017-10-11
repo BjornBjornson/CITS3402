@@ -4,7 +4,7 @@
 #include <sys/time.h>
 #include <time.h>
 #include <stdbool.h>
-#include "khash.h"
+#include "uthash.h"
 #define L 10     	/* Linear edge dimension of map */
 #define N L*L		// total number of nodes in a single map
 /*
@@ -12,6 +12,11 @@ int lowest(int *clusters, int *map){
 	//remember to unbind all temporary pointers 
 	return 1;
 }*/
+struct cluster{
+		int parent;
+		int size;
+	};
+	
 int lowest_num(int start, int *counter, int *update, int *superclusters){
 	
 	while(superclusters[start]!=start){
@@ -30,6 +35,7 @@ void updater(int j, int count, int *update, int *superclusters){
 
 
 int combi(){
+	
 	int A1[L]={2,0,0,0,2,0,3,0,3,3};
 	int A2[L]={2,0,2,0,3,0,3,0,4,4};
 	int A3[L]={4,0,5,0,6,0,7,0,3,3};
