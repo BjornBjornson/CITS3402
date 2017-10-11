@@ -70,7 +70,7 @@ void side_update(int *side, struct cluster **refMap, struct cluster **superclust
 }
 //void add_cluster()
 
-int combi(){
+int combi(/*int *(AA[L]), int *(BB[L]), int highest_id*/){ //tried to wrangle it- failed. should be simple - passing two variable sized arrays of int[L] arrays, and one integer.
 	struct cluster *all_clusters= NULL; // will be persistent and held somewhere.
 	int highest_id = 109; //keeping track of Id's. It'll be easier in the long run to just keep iterating up.
 	struct cluster *link_A = NULL;
@@ -302,14 +302,7 @@ int combi(){
 	printf("GOT HERE\n");
 	
 	//all of this is going to rely on ID's remaining unique, and just iterating upwards.
-	if(numSupers>1){
-		struct cluster *test;
-		int git =112;
-		HASH_FIND_INT(superclusters, &git, test);
-		if(test){
-			printf("TEST TEST TEST  %i\n",test->parent);
-		}
-	}
+
 	//return 1;
 	for(int Z=0; Z<L;Z++){
 		struct cluster *my_super;
