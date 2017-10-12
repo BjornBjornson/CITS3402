@@ -132,7 +132,7 @@ void push(int i, int j){
 	cluster[top].x = j;
 	cluster[top].y = i;
 	popped = false;
-	printf("top %i\t",top);
+	//printf("top %i\t",top);
 }
 
 struct Stack pop(){
@@ -157,7 +157,7 @@ void deadEnd(int i, int j){					//function to change paths to level 3 -> no more
 }
 
 void displayNode(){			
-	printf("(%i, %i)\t", peek().y, peek().x);		//prints out map co-ordinate
+	//printf("(%i, %i)\t", peek().y, peek().x);		//prints out map co-ordinate
 }
 
 // determines next node in the cluster
@@ -168,7 +168,7 @@ struct Node * getNextNode() {
 		
 		int j = peek().x ;
 		int i = peek().y ;
-		printf("check1 (%i, %i)\t",i,j);	
+		//printf("check1 (%i, %i)\t",i,j);	
 
 /*the following first checks if flag on, then path is 0 and if 1 it also checks previous direction to make sure not cycling back on itself.  If no options available then 2 is applied to the node and stack drops the top node
 
@@ -225,15 +225,15 @@ note that I have not assumed the lattice can cycle around itself as I think we w
 		else {
 			deadEnd(peek().y, peek().x);			// changes path status to 2
 			pop();	
-			printf("popped check top value= %i\n",top);	 
+			//printf("popped check top value= %i\n",top);	 
 													// reduces top index by 1 
 			if (top == -1) return map[i][j];
-			printf("top2= %i\t",top);				//then if top==-1 the DFS exits on next loop
-			printf("top-1  (%i, %i)\t",cluster[top].y,cluster[top].x);	
+			//printf("top2= %i\t",top);				//then if top==-1 the DFS exits on next loop
+			//printf("top-1  (%i, %i)\t",cluster[top].y,cluster[top].x);	
 
 			return map[cluster[top].y][cluster[top].x];	
 		}
-		printf("check2 (%i, %i)\t",i,j);	
+		//printf("check2 (%i, %i)\t",i,j);	
 
 	return map[i][j];
 }
@@ -314,140 +314,23 @@ int depthFirstSearch(int i, int j, int clusterID){
 		temp[0][0] = getNextNode();						// allocate new node coords
 		i = temp[0][0]->y;
 		j = temp[0][0]->x;		
-		printf("check3 (%i, %i)\n",i,j);	
+		//printf("check3 (%i, %i)\n",i,j);	
 
 		if (!popped) ++top;						//want to go back to previous node if no connection made
 
 	}	
 
 	for (int k = 0; k< count; k++){
-		printf("cluster[%i] = (%i, %i, %c)\n", k, cluster[k].y, cluster[k].x, cluster[k].dir);		
+		//printf("cluster[%i] = (%i, %i, %c)\n", k, cluster[k].y, cluster[k].x, cluster[k].dir);		
 														//prints out map co-ordinate
 	}
 	return count;
 
 }
-/*
-will probably have to prepare some sort of thing to figure out how large the box will end up, and prepare memory locations for the side arrays.
-also: since it wraps around on both sides, keeping track of the span is more important. Bother. Might be easier to quietly ignore the vertical wraparound.
-*/
 
-/*
-some sort of for loop determined in master core, using the size of the unit to split up the grid with a pair of for loops: 
-these loops can be used to determine which section of edge will be used for comparison next. Might be able to do this in quadrants too. 
-So the four threads on the master can independantly proccess incoming data, and then have a big mash-together at the end.
 
-*/
-void cluster_combiner(){
-	int A[5]; //must remember to check existance while looping through this. will cause errors otherwise.
-	int B[5];
-	int SA[L]={2,0,2,0,0,3,3,0,3,3};// having these as non-pointers will be faster, and probably possible, since they're pretty small.
-	int SB[L]={4,4,0,2,2,0,3,0,5,5};
-	int numSupers =0;
-	int superclusters[L]={0};
-	int superSize[L];
-	for(int i=0;i<L;i++){
-		if(SA[i]!=0 && SB[i]!=0){ //if neither side is empty
-			if(!A[SA[i]-2]&&!B[SB[i]-2]){ //if neither side's super-link list position exists yet. (hopefully)
-				A[numSupers]=numSupers;
-				B[numSupers]=numSupers;
-				superclusters[numSupers]=numSupers; //referencing itself, meaning that it hasn't been linked to another cluster yet.
-				superSize[numSupers]=1; //will get to recording proper sizes later in development
-				numSupers++;
-			}else if((A[SA[i]-2]&&!B[SB[i]-2])||(!A[SA[i]-2]&&B[SB[i]-2]))
-			int working =1;
-			int update[L]={0}; //going to be used to keep the dependency chains as short as possible.
-			
-		}else if(SA[i]!=0){
-			//check for supercluster, add one if missing
-		}else if(SB[i]!=0){
-			//ditto
-		}
-		//else ignore;
-	}
-	/*
-	for ease of understanding: consider it set A and set B.
-	Treating set A preferentially because it makes an easy convention.
-	code logic:
-	int numSupers =0; //will hold the number of created superclusters (will get to that in a moment)
-	create new int[L]. <supercluster hence forth>.   the lowest indexed connected supercluster 
-	
-	two arrays <linkArrays> (A[], B[]) to hold supercluster links from each of the old cluster arrays. - make each size(N/2) so they can be indexed by original ID? possibly use calloc/pointers. dynamic arrays woo.
-	
-	
-	afterwards will just append any un-rebound clusters at a new, sequential cluster ID.
-	go through the paired side-arrays:
-		if two non-zero matches:
-			check set A&B- 
-				neither has supercluster (even if one is an empty node): make new supercluster with a value the same as it's index, give both A&B the supercluster's index.
-				if only one is has a binding: Follow the superclusters: i=supercluster[X] while X!=i {keep searching} give final value to new binding.
-				in both bound to superclusters: 
-					Check both superclusters: if value!= index ->
-					create a temporary int array for each set. size L should do it.
-					check supercluster[index] until value== index on each side. use the temp arrays to store the index steps that were needed.
-					If they're already connected: should end up with the same number. 
-					Otherwise: set the lower of the two numbers as int temp_id
-					By doing this Every time it should keep the actual time spent doing this relatively short, since any long chains will be turned into short ones very quickly.
-					<this bit could be parralelised>
-					int i=0;
-					while(temp_arrayA[i]){
-						A[temp_arrayA[i]]=temp_id;
-						i++;
-					}
-					i=0;
-					while(temp_arrayB[i]){
-						B[temp_arrayB[i]]=temp_id;
-						i++;
-					}
-		
-		At this stage it should have a pair of linkArrays with either NULL or an int.
-		
-		int count=0;
-		struct cluster new_clusters[some_size];
-		for each item in linkArray A then B: //
-			if item (ie, !=NULL){
-				int new_id= <find terminating supercluster number> -should be quick
-				for each in old_side:
-				new_side=new_id; <for every side>
-				new_clusters->size += old_clusters[item.id]->size;
-				if new_clusters[item.index]{
-					if(id!=index){
-						count++;
-						new_clusters[count]=new_clusters[item.index];
-						new_clusters[item.index]=item;
-					}else{
-						new_clusters[item.index]->size +=item.size;
-					}
-				}else{
-					new_clusters[count]=item;
-					count++;
-				}
-			}else{
-				new_clusters[count]=old_clusters[item.index];
-				count++;
-			}
-			
-		
-		
-	
-	*/
-	
-}
-
-void search_manager(int p, int size){
+void search(double p){
 	//TODO: migrate code from main
-}
-
-int main(int argc, char *argv[]){
-
-    if(argc != 2)
-    {
-        fprintf(stderr, " ERROR\n Usage: ./one probability \n");
-        exit(EXIT_FAILURE);             // Exit program indicating failure
-    }
-    else
-    {	
-	    double p = atof(argv[1]);
 		int dfs;
 		int clusterID = 2;
 		char row = 'y';
@@ -492,6 +375,7 @@ int main(int argc, char *argv[]){
 				}
 			}
 		}
+		printf("\n\n");
 		printBonds();
 		printf("TOP LNE: ");
 		for(int i=0;i<L;i++){
@@ -516,7 +400,19 @@ int main(int argc, char *argv[]){
 				perc[i].ID, perc[i].size, perc[i].rows, perc[i].cols);
 		}
 		printf("\n");
+}
 
+int main(int argc, char *argv[]){
+
+    if(argc != 2)
+    {
+        fprintf(stderr, " ERROR\n Usage: ./one probability \n");
+        exit(EXIT_FAILURE);             // Exit program indicating failure
+    }
+    else
+    {	
+	    double p = atof(argv[1]);
+		search(p);
 
 		return 0;
     }
