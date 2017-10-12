@@ -4,6 +4,7 @@
 #include <sys/time.h>
 #include <time.h>
 #include <stdbool.h>
+#include "uthash.h"
 
 //  compile:  gcc -fopen -o dfs dfs10.c
 //  run:      ./dfs probability
@@ -44,7 +45,8 @@ struct Interface{
 
 struct node_cluster{
 	int id;
-	//char source;
+	int row_perc;
+	int col_perc;
 	int parent;
 	int size;
 	UT_hash_handle hh;
@@ -999,7 +1001,7 @@ int main(int argc, char *argv[]){
     {
 		double p = atof(argv[1]);
 		search_control(p);
-                return 0;
+        return 0;
     }
 }
 
