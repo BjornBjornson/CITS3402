@@ -119,32 +119,6 @@ void seed(double probability, struct Node map[L][L])
         //printf("\n");
         }
 }
-void parra_printBonds(struct Node **mapt){
-		printf("\nTESTETETETET	%i	TESTESTEST\n",mapt[0][0].flag);
-
-        int i,j;
-        for (i = 0; i < (L); i++){
-                for (j = 0; j < L; j++){
-                        if (mapt[i][j].flag>0){
-                                if (mapt[i][(j+1)%L].flag > 0) printf("%i ----- ", mapt[i][j].flag);
-
-                                else printf("%i\t", mapt[i][j].flag);
-                        }
-                        else printf("%i\t", mapt[i][j].flag);
-
-                }
-                printf("\n");
-                for (j = 0; j < L; j++){
-                        if (mapt[i][j].flag>0){
-
-                                if (mapt[(i+1)%L][j].flag >0) printf("|\t");
-                                else printf("\t");
-                        }
-                        else printf("\t");
-                }
-                printf("\n");
-        }
-}
 
 void printBonds(struct Node map[L][L]){
 
