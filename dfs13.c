@@ -520,7 +520,7 @@ int main(int argc, char *argv[]){
 
             struct timeval start, end;
             gettimeofday(&start, NULL);
-			struct Node map[4][L][L];
+			struct Node map[4][L][L]; //change this to match number of threads
             omp_set_num_threads(4);
 
             #pragma omp parallel
