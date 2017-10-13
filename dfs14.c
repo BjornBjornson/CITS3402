@@ -13,6 +13,31 @@
 #define L 8             /* Linear edge dimension of map */
 #define N L*L           // total number of nodes in a single map
 
+// Initialising the side arrays to 0-empty. Will be filled with clusterID numbers as they are found during the search/navigation.
+int upSide[L]={0};
+int downSide[L]={0};
+int leftSide[L]={0};
+int rightSide[L]={0};
+int upSideP[L]={0};
+int downSideP[L]={0};
+int leftSideP[L]={0};
+int rightSideP[L]={0};
+
+// initialise arrays to store percolated nodes for each section
+int perc0[L*4]={0};
+int perc1[L*4]={0};
+int perc2[L*4]={0};
+int perc3[L*4]={0};
+
+// initialise arrays to store whether node_cluster has spanned all rows and/or all columns
+int rowPerc[L]={0};
+int columnPerc[L]={0};
+
+int top = 0;
+int count = 0;
+bool popped = false;
+
+
 struct Node {
         int flag;                       // occupied=1, unoccupied=0, already in a cluster=2+
         int up;                         // (0=not visited,1=visited,2=all directions visited,-1=when parent node)       
@@ -438,29 +463,7 @@ int combi(struct node_cluster **all_clusters,int *highest_id, int *SA, int **AA,
 	
 	
 }
-// Initialising the side arrays to 0-empty. Will be filled with clusterID numbers as they are found during the search/navigation.
-int upSide[L]={0};
-int downSide[L]={0};
-int leftSide[L]={0};
-int rightSide[L]={0};
-int upSideP[L]={0};
-int downSideP[L]={0};
-int leftSideP[L]={0};
-int rightSideP[L]={0};
 
-// initialise arrays to store percolated nodes for each section
-int perc0[L*4]={0};
-int perc1[L*4]={0};
-int perc2[L*4]={0};
-int perc3[L*4]={0};
-
-// initialise arrays to store whether node_cluster has spanned all rows and/or all columns
-int rowPerc[L]={0};
-int columnPerc[L]={0};
-
-int top = 0;
-int count = 0;
-bool popped = false;
 
 
 /*      this functions seeds the map with occupied or unoccupied nodes depending on probability entered
@@ -516,11 +519,24 @@ void seed(double probability, struct Node map[L][L])
         }
 }
 
-void printBonds(struct Node map[L][L]){
+void printBonds(struct Node map[L][L], int** sides){
 
         int i,j;
         for (i = 0; i < (L); i++){
                 for (j = 0; j < L; j++){
+			if(i==0){
+				sides[0][j]=map[i][j].flag;
+			}
+			if(i==L-1){
+				sides[2][j]=map[i][j].flag;
+			}
+			if(j==0){
+				sides[1][i]=map[i][j].flag;
+			}
+			if(j==L-1){
+				sides[3][i]=map[i][j].flag;
+			}
+				
                         if (map[i][j].flag>0){
                                 if (map[i][(j+1)%L].flag > 0) printf("%i ----- ", map[i][j].flag);
 
@@ -666,8 +682,9 @@ int depthFirstSearch(int i, int j, int clusterID, struct Node map[L][L]){
 
         top = 0;
 		if(omp_get_thread_num()==0){
-		printf("\n clusterID %i:\n",clusterID);
-		printBonds(map);
+		
+		//printf("\n clusterID %i:\n",clusterID);
+		//printBonds(map,temp);
 		printf("\n");
 		}
         if (map[i][j].flag == 0 || map[i][j].flag >1) return 0;
@@ -857,7 +874,16 @@ void matchClusters(){
 	}
 	printf("\n");
 }
+
 void search_control(double p){
+	int ***my_sides;
+	my_sides=calloc(4, sizeof(int *));
+	for(int i=0; i<4;i++){
+		my_sides[i]=calloc(4,sizeof(int *));
+		for(int j=0; j<4;j++){
+			my_sides[i][j]=calloc(L, sizeof(int));
+		}
+	}
 
             
 	double delta;
@@ -881,7 +907,7 @@ void search_control(double p){
 	{
 		int dfs;
 		seed(p, map[omp_get_thread_num()]);
-		printBonds(map[omp_get_thread_num()]);
+		printBonds(map[omp_get_thread_num()],my_sides[omp_get_thread_num()]);
 		clusterID = 2;
 
 		//#pragma omp parallel  //for num_threads(4)
@@ -946,17 +972,25 @@ void search_control(double p){
 		
 		//printBonds(map[omp_get_thread_num()]);
 		
-		
+
 		}
 		}
 		
 		for(int Z=0;Z<4;Z++){
 			printf("FROM THREAD %i: \n",Z);
-			printBonds(map[Z]);
+			printBonds(map[Z],my_sides[Z]);
+			printf("\n");
+			for(int Y=0; Y<4;Y++){
+				for(int X=0;X<L;X++){
+					printf("%i,",my_sides[Z][Y][X]);
+				}printf("\n");
+			}
 			printf("\n\n");
 		}
 		
 		printf("\n\n");
+		struct node_cluster *all_groups = NULL;
+		
 		//printBonds(map);
 		printf("1st GROUP: ");
 		for(i=0;i<L*4;i++){
@@ -988,6 +1022,7 @@ void search_control(double p){
 		delta = ((end.tv_sec  - start.tv_sec) * 1000000u +
 						end.tv_usec - start.tv_usec) / 1.e6;
 		printf("time=%12.10f\n",delta);
+		
 
 }
 int main(int argc, char *argv[]){
@@ -1004,6 +1039,5 @@ int main(int argc, char *argv[]){
         return 0;
     }
 }
-
 
 
