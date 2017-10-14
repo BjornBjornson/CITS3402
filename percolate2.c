@@ -114,7 +114,7 @@ void updater(int j, int count, int *update, struct node_cluster **superclusters)
 	
 }*/
 void side_update(int length, int *side, struct node_cluster **refMap, struct node_cluster **superclusters){
-	printf("UPDATE");
+	
 	for(int Z =0; Z<length;Z++){ // you can see that this should be iterated across all sides.
 		struct node_cluster *link;
 		HASH_FIND_INT(*refMap, &side[Z], link);
@@ -415,9 +415,13 @@ int combi(struct node_cluster **all_clusters,int *highest_id, struct node_cluste
 	// Now going through the original side-list and updating all other side-list information. Then going to remove old entry from the all_clusters hashmap.
 	
 	printf("\n");
+	side_update(L*A_height, AA[0], &link_A, &superclusters);
+	side_update(L*A_height, AA[2], &link_A, &superclusters);
+	side_update(L*B_height, BB[0], &link_A, &superclusters);
+	side_update(L*B_height, BB[2], &link_A, &superclusters);
+	side_update(L*comp_length, AA[1], &link_A, &superclusters);
+	side_update(L*comp_length, BB[1], &link_A, &superclusters);
 	for(int Z =0; Z<(2*A_height+comp_length);Z++){ 
-		printf("%i\n",Z);
-		side_update(L, AA[Z], &link_A, &superclusters);
 		for(int Y=0; Y<L;Y++){
 			printf("%i,",AA[Z][Y]);
 		}printf("\n");
@@ -425,7 +429,6 @@ int combi(struct node_cluster **all_clusters,int *highest_id, struct node_cluste
 	printf("\n");
 	printf("NOW B\n");
 	for(int Z =0; Z<(2*B_height+comp_length);Z++){ // 
-		side_update(L, BB[Z], &link_B, &superclusters);
 		for(int Y=0; Y<L;Y++){
 			printf("%i,",BB[Z][Y]);
 		}printf("\n");
@@ -1106,16 +1109,20 @@ void match_control(int ***my_sides, struct Percolate perc[NTHREADS][N/2], int hi
 		}
 		printf("\n\n");
 	}
-/* pointers to free: 
-
-
-
-*/
-//multithread this bit
-
 	int comp_length= 1; 
 	int A_height =1; 
 	int B_height=1;
+/* pointers to free: 
+SA
+SB
+AA
+BB
+
+
+*/
+//this bit into a loop
+
+	
 	struct node_cluster **all_clusters;
 	all_clusters=calloc(NTHREADS,sizeof(struct node_cluster*));
 	for(int i=0; i<NTHREADS;i++){
@@ -1136,17 +1143,26 @@ void match_control(int ***my_sides, struct Percolate perc[NTHREADS][N/2], int hi
 	int **AA=calloc(A_height*2+comp_length, sizeof(int *));
 	int **BB=calloc(B_height*2+comp_length, sizeof(int *));
 	//insert a case-gate to define direction of joining
-	AA[0]=my_sides[0][0];
-	AA[1]=my_sides[0][-1];
-	AA[2]=my_sides[0][2];
-	BB[0]=my_sides[0][0];
-	BB[1]=my_sides[1][1];
-	BB[2]=my_sides[2][2];
-	/*for(int i=0; i<3; i++){
-		for(int j=0; j<L;j++){
-			printf("%i:", AA[i][j]);
-		}
-	}*/
+	AA[0]=calloc(L*A_height, sizeof(int));
+	AA[2]=calloc(L*A_height, sizeof(int));
+	AA[1]=calloc(L*comp_length, sizeof(int));
+	BB[0]=calloc(L*A_height, sizeof(int));
+	BB[2]=calloc(L*A_height, sizeof(int));
+	BB[1]=calloc(L*comp_length, sizeof(int));
+	for(int i=0; i<L*A_height;i++){
+		AA[0][i] = my_sides[0/*need to put in the geometry here*/][0][i];
+		AA[2][i] = my_sides[0/*need to put in the geometry here*/][2][i];
+	}
+	for(int i=0; i<L*B_height;i++){
+		BB[0][i] = my_sides[1/*need to put in the geometry here*/][0][i];
+		BB[2][i] = my_sides[1/*need to put in the geometry here*/][2][i];
+	}
+	for(int i=0; i<L*comp_length;i++){
+		AA[1][i] = my_sides[0/*need to put in the geometry here*/][3][i];
+		BB[1][i] = my_sides[1][1][i];
+	}
+	
+		
 	/*struct node_cluster empty; //needs to be here as a reference empty node
 		empty.id=0;
 		empty.parent = 0;
