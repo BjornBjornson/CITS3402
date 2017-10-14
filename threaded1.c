@@ -37,9 +37,10 @@ struct Percolate{
 } perc[N];
 
 struct Interface{
-		char connect;
+		char rows;
+		char cols;
 		int size;
-} interface[8];
+} interface[4];
 
 struct Combination{
 	int a[L*4];
@@ -136,7 +137,6 @@ void seedBond(double probability, struct Node map[L][L])
                         else seeded1 = 0;
                         if (r2>probability) seeded2 = 2;
                         else seeded2 = 0;
-                        printf("pr1: %i\t pr2: %i\t", seeded1, seeded2);                                //check print of probability values
 
                         map[i][j].right = seeded1;
 						if (j+1 < L) map[i][j+1].left = seeded1;
@@ -398,80 +398,112 @@ int depthFirstSearch(int i, int j, int clusterID, struct Node map[L][L]){
 
 
 /*
-	0	1	2	3	4	5	6	7						0	1	2	3	4	5	6	7			
-31									8				31									8		
-30									9				30									9		
-29									10				29									10		
-28			combination.a	  		11				28			combination.b			11		
-27									12		R0		27									12		R1
-26									13				26									13		
-25									14				25									14		
-24									15				24									15		
+	0	1	2	3	4	5	6	7						0	1	2	3	4	5	6 7			
+31									8				31							8		
+30									9				30							9		
+29									10				29							10		
+28			combination.a	  				11				28			combination.b			11		
+27									12		R0		27							12		R1
+26									13				26							13		
+25									14				25							14		
+24									15				24							15		
+	23	22	21	20	19	18	17	16						23	22	21	20	19	18	1716			
+																								
+				C0													C1						
+																								
+	0	1	2	3	4	5	6	7						0	1	2	3	4	5	67			
+31									8				31							8		
+30									9				30							9		
+29									10				29							10		
+28									11		R2		28							11		R3
+27			combination.c					12				27			combination.d			12		
+26									13				26							13		
+25									14				25							14		
+24									15				24							15		
 	23	22	21	20	19	18	17	16						23	22	21	20	19	18	17	16			
 																								
-				C0														C1						
 																								
-	0	1	2	3	4	5	6	7						0	1	2	3	4	5	6	7			
-31									8				31									8		
-30									9				30									9		
-29									10				29									10		
-28									11		R2		28									11		R3
-27			combination.c			12				27			combination.d			12		
-26									13				26									13		
-25									14				25									14		
-24									15				24									15		
-	23	22	21	20	19	18	17	16						23	22	21	20	19	18	17	16			
-																								
-																								
-				C2														C3						
+				C2													C3						
 */
 void matchClusters(struct Combination combination){
 	int n;
 	int size; 
+	int max = 0;
 	int numPerc = 0;
-	char percolated = 'y';
+	char rows = 'n';
+	char cols = 'n';
+	char both = 'n';
+	char percolated = 'n';
+	
+	interface[0].size = combination.aSize;
+	interface[1].size = combination.bSize;
+	interface[2].size = combination.cSize;
+	interface[3].size = combination.dSize;
 
-	for (n=0; n<8; n++){
-		interface[n].connect = 'n';
+	for (n=0; n<4; n++){
+		interface[n].rows = 'n';
+		interface[n].cols = 'n';
 	}
 	for (n=0; n<L; n++){
 		if (combination.a[n+L] > 0){					
-			if (combination.a[n+L] == combination.b[L*4-n-1]) interface[0].connect = 'y';	//R0
+			if (combination.a[n+L] == combination.b[L*4-n-1]) interface[0].rows = 'y';	//R0
 		}
 		if (combination.a[n+L*2] > 0){
-			if (combination.a[n+L*2] == combination.c[L-n-1]) interface[1].connect = 'y';    //CO
+			if (combination.a[n+L*2] == combination.c[L-n-1]) interface[0].cols = 'y';    //CO
 		}
 		if (combination.a[n+L*3] > 0){
-			if (combination.a[n+L*3] == combination.b[L*2-n-1]) interface[2].connect = 'y';		//R1
-		}
-		if (combination.a[n] > 0){
-			if (combination.a[n] == combination.c[L*3-n-1]) interface[3].connect = 'y';		//C2
+			if (combination.a[n+L*3] == combination.b[L*2-n-1]) interface[1].rows = 'y';	//R1
 		}
 		if (combination.d[n] > 0){
-			if (combination.d[n] == combination.b[L*3-n-1]) interface[4].connect = 'y';   //C1
-		}
-		if (combination.d[n+L] > 0){
-			if (combination.d[n+L] == combination.c[L*4-n-1]) interface[5].connect = 'y';  //R3
-		}		
-		if (combination.d[n+L*2] > 0){
-			if (combination.d[n+L*2] == combination.b[L-n-1]) interface[6].connect = 'y';  //C3
+			if (combination.d[n] == combination.b[L*3-n-1]) interface[1].cols = 'y';   //C1
 		}
 		if (combination.d[n+L*3] > 0){
-			if (combination.d[n+L*3] == combination.c[L*2-n-1]) interface[7].connect = 'y';	//R2
+			if (combination.d[n+L*3] == combination.c[L*2-n-1]) interface[2].rows = 'y';	//R2
+		}
+		if (combination.a[n] > 0){
+			if (combination.a[n] == combination.c[L*3-n-1]) interface[2].cols = 'y';	//C2
+		}
+		if (combination.d[n+L] > 0){
+			if (combination.d[n+L] == combination.c[L*4-n-1]) interface[3].rows = 'y';  //R3
+		}		
+		if (combination.d[n+L*2] > 0){
+			if (combination.d[n+L*2] == combination.b[L-n-1]) interface[3].cols = 'y';  //C3
 		}
 	}
 
-	printf("interface connection = ");
-	for (n=0; n<8; n++){
-		printf("%c \t",interface[n].connect);
-		if (interface[n].connect == 'y') numPerc++;
+	if (interface[0].rows == 'y' && interface[1].rows == 'y') rows = 'y';
+
+	if (interface[2].rows == 'y' && interface[3].rows == 'y') rows = 'y';
+	
+	if (interface[0].cols == 'y' && interface[2].cols == 'y') cols = 'y';
+	
+	if (interface[1].cols == 'y' && interface[3].cols == 'y') cols = 'y';
+	
+	if (rows == 'y' && cols == 'y') both = 'y';
+	
+	if (interface[0].rows == 'y' || interface[0].cols == 'y' || interface[1].rows == 'y' || interface[2].cols == 'y'){	
+		size += interface[0].size;
 	}
-	if (numPerc > 6) {
-		size = combination.aSize + combination.bSize + combination.cSize + combination.dSize;
-		printf("\npercolated cluster size = %i \n", size);
-	} else {
-		printf("\ncluster did not percolate\n");
+	if (interface[0].rows == 'y' || interface[1].cols == 'y' || interface[1].rows == 'y' || interface[3].cols == 'y'){	
+		size += interface[1].size;
 	}
+	if (interface[2].rows == 'y' || interface[0].cols == 'y' || interface[3].rows == 'y' || interface[2].cols == 'y'){	
+		size += interface[2].size;
+	}
+	if (interface[2].rows == 'y' || interface[1].cols == 'y' || interface[3].rows == 'y' || interface[3].cols == 'y'){	
+		size += interface[3].size;
+	}
+	for (n = 0; n<4; n++){
+		if (interface[n].size > max) max = interface[n].size;
+	}
+
+	printf("columns percolated = %c \n", cols);
+	printf("rows percolated = %c \n", rows);
+	printf("both percolated = %c \n", both);
+
+	if (cols == 'y' || rows == 'y') printf("\nPercolated cluster size = %i \n", size);
+	else printf("\nLattice did not percolate. Maximum cluster size = %i\n", max);
+
 	printf("\n");
 }
 
@@ -626,9 +658,6 @@ void searchControl(int threadID, double probability, char seedType){
                 printf("k = %i\n",k);
 				if (seedType == 's') {
 					printSites(map[threadID]);
-				}
-				else {
-	               	printBonds(map[threadID]);
 				}
 				
                 printf("\n\n\n");
