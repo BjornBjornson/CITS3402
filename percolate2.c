@@ -1120,24 +1120,25 @@ BB
 
 
 */
-//this bit into a loop
-
-	
+//this bit can be multithreaded easily. just leaving it for now though.
 	struct node_cluster **all_clusters;
-	all_clusters=calloc(NTHREADS,sizeof(struct node_cluster*));
-	for(int i=0; i<NTHREADS;i++){
+	all_clusters=calloc(2,sizeof(struct node_cluster*));
+	for(int i=0; i<2;i++){
 		all_clusters[i]=NULL;
 		for(int j=2;j<high_ID[i];j++){
 			struct node_cluster *initialising;
 			initialising=calloc(1, sizeof(struct node_cluster));
 			initialising->id=i;
-			initialising->row_perc=perc[i][j].rows;
-			initialising->col_perc=perc[i][j].cols;
-			initialising->size=perc[i][j].size;
+			initialising->row_perc=perc[2*i][j].rows;
+			initialising->col_perc=perc[2*i][j].cols;
+			initialising->size=perc[2*i][j].size;
 			initialising->parent=i;
-			HASH_ADD_INT(all_clusters[i], id, initialising);
+			HASH_ADD_INT(all_clusters[2*i], id, initialising);
 		}
 	}
+	for(int MF = 0; MF<2;MF++){//will need to change this when creating differently sized grids(of threads) // using an additional sub-loop to handle non-2X2 grids.
+	
+	
 	struct node_cluster *SA;
 	struct node_cluster *SB;
 	int **AA=calloc(A_height*2+comp_length, sizeof(int *));
@@ -1150,57 +1151,53 @@ BB
 	BB[2]=calloc(L*A_height, sizeof(int));
 	BB[1]=calloc(L*comp_length, sizeof(int));
 	for(int i=0; i<L*A_height;i++){
-		AA[0][i] = my_sides[0/*need to put in the geometry here*/][0][i];
-		AA[2][i] = my_sides[0/*need to put in the geometry here*/][2][i];
+		AA[0][i] = my_sides[MF*2/*need to put in the geometry here*/][0][i];
+		AA[2][i] = my_sides[MF*2/*need to put in the geometry here*/][2][i];
 	}
 	for(int i=0; i<L*B_height;i++){
-		BB[0][i] = my_sides[1/*need to put in the geometry here*/][0][i];
-		BB[2][i] = my_sides[1/*need to put in the geometry here*/][2][i];
+		BB[0][i] = my_sides[MF*2+1/*need to put in the geometry here*/][0][i];
+		BB[2][i] = my_sides[MF*2+1/*need to put in the geometry here*/][2][i];
 	}
 	for(int i=0; i<L*comp_length;i++){
-		AA[1][i] = my_sides[0/*need to put in the geometry here*/][3][i];
-		BB[1][i] = my_sides[1][1][i];
+		AA[1][i] = my_sides[MF*2/*need to put in the geometry here*/][3][i];
+		BB[1][i] = my_sides[MF*2+1][1][i];
 	}
 	
 		
-	/*struct node_cluster empty; //needs to be here as a reference empty node
-		empty.id=0;
-		empty.parent = 0;
-		empty.size=0;
-		empty.col_perc=0;
-		empty.row_perc=0;*/
+
 	SA=calloc(comp_length*L, sizeof(struct node_cluster));
 	SB=calloc(comp_length*L, sizeof(struct node_cluster));
 	for(int i=0; i<L;i++){
-		if(my_sides[0][1][i]==0){
+		if(my_sides[MF*2][1][i]==0){
 			SA[i].id=0;
 			SA[i].parent = 0;
 			SA[i].size=0;
 			SA[i].col_perc=0;
 			SA[i].row_perc=0;
 		}else{
-			SA[i].id=my_sides[0][1][i];
-			SA[i].parent = my_sides[0][1][i];
-			SA[i].size=perc[0][i].size;
-			SA[i].col_perc=perc[0][i].rows;
-			SA[i].row_perc=perc[0][i].cols;
-		}if(my_sides[1][3][i]==0){
+			SA[i].id=my_sides[MF*2][1][i];
+			SA[i].parent = my_sides[MF*2][1][i];
+			SA[i].size=perc[MF*2][i].size;
+			SA[i].col_perc=perc[MF*2][i].rows;
+			SA[i].row_perc=perc[MF*2][i].cols;
+		}if(my_sides[MF*2+1][3][i]==0){
 			SB[i].id=0;
 			SB[i].parent = 0;
 			SB[i].size=0;
 			SB[i].col_perc=0;
 			SB[i].row_perc=0;
 		}else{
-			SB[i].id=my_sides[1][3][i];
-			SB[i].parent = my_sides[1][3][i];
-			SB[i].size=perc[1][i].size;
-			SB[i].col_perc=perc[1][i].rows;
-			SB[i].row_perc=perc[1][i].cols;
+			SB[i].id=my_sides[MF*2+1][3][i];
+			SB[i].parent = my_sides[MF*2+1][3][i];
+			SB[i].size=perc[MF*2+1][i].size;
+			SB[i].col_perc=perc[MF*2+1][i].rows;
+			SB[i].row_perc=perc[MF*2+1][i].cols;
 		}
 	}
 //		int combi(struct node_cluster **all_clusters,int *highest_id, struct node_cluster *SA, int **AA, struct node_cluster *SB, int **BB, int comp_length, int A_height, int B_height){ 
 	int out = combi(&all_clusters[0],&high_ID[0], SA, AA,SB,BB, comp_length,A_height,B_height);
 	printf("%i",out);
+	}
 
 	
 }
