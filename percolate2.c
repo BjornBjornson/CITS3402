@@ -145,9 +145,9 @@ int combi(struct node_cluster **all_clusters,int *highest_id, struct node_cluste
 		struct node_cluster *B;
 		HASH_FIND_INT(link_A, &SA[i].id, A);
 		HASH_FIND_INT(link_B, &SB[i].id, B);
-		printf("%i: SA[i]\n",SA[i].id);
+		printf("%i: old cluster ID for side A\n",SA[i].id);
 		if(A){
-			printf("%i: link_A[SA[i]]\n",A->parent);
+			printf("%i: linked new cluster ID\n",A->parent);
 		}else{
 			printf("-1: link_A[SA[i]]\n");
 		}
@@ -157,6 +157,7 @@ int combi(struct node_cluster **all_clusters,int *highest_id, struct node_cluste
 		}else{
 			printf("-1: link_B[SB[i]]\n\n");
 		}
+		printf("Cluster A's full side, with linked cluster number below\n");
 		for(int j=0;j<comp_length*L;j++){
 			printf("%i::",SA[j].parent);
 		}printf("\n");
@@ -169,7 +170,7 @@ int combi(struct node_cluster **all_clusters,int *highest_id, struct node_cluste
 			else{
 				printf("-1::");
 			}
-		}printf("\n");
+		}printf("\nCluster B's full side, with linked cluster number below\n");
 		for(int j=0;j<comp_length*L;j++){
 			printf("%i::",SB[j].parent);
 		}printf("\n");
