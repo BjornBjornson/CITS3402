@@ -1467,4 +1467,4 @@ int main(int argc, char *argv[]){
 }
 
 
-printf("\n%iHEROUHASDOUHAOSDU\n",BB[0][Z]);
+
