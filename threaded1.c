@@ -5,8 +5,8 @@
 #include <time.h>
 #include <stdbool.h>
 
-//  compile:  gcc -fopen -o dfs dfs10.c
-//  run:      ./dfs probability
+//  compile:  gcc -fopen -o t threaded1.c
+//  run:      ./t seedType probability 
 // this version changes the Node map back to a non-pointer to enable new seeded maps
 
 #define L 8             /* Linear edge dimension of map */
@@ -170,7 +170,6 @@ void seedBond(double probability, struct Node map[L][L])
                                 map[i][j].right = 2;
                         }
                 }
-        //printf("\n");
         }
 
 }
@@ -444,6 +443,7 @@ void matchClusters(struct Combination combination){
 		interface[n].rows = 'n';
 		interface[n].cols = 'n';
 	}
+	//#pragma omp parallel for private(n)
 	for (n=0; n<L; n++){
 		if (combination.a[n+L] > 0){					
 			if (combination.a[n+L] == combination.b[L*4-n-1]) interface[0].rows = 'y';	//R0
@@ -496,6 +496,8 @@ void matchClusters(struct Combination combination){
 	for (n = 0; n<4; n++){
 		if (interface[n].size > max) max = interface[n].size;
 	}
+
+	printf("Lattice size = %i x %i \n\n", L*2, L*2);
 
 	printf("columns percolated = %c \n", cols);
 	printf("rows percolated = %c \n", rows);
@@ -694,10 +696,10 @@ void searchControl(int threadID, double probability, char seedType){
 
 int main(int argc, char *argv[]){
 
-    if(argc != 4)
+    if(argc != 3)
     {
-        fprintf(stderr, " ERROR\n Usage: ./perc seedType probability percolationType\n");
-										// example: "./perc s 0.55 0"  
+        fprintf(stderr, " ERROR\n Usage: ./perc seedType probability \n");
+					// example: "./perc s 0.55"  
         exit(EXIT_FAILURE);             // Exit program indicating failure
     }
     else

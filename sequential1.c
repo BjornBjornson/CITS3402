@@ -5,11 +5,11 @@
 #include <time.h>
 #include <stdbool.h>
 
-//  compile:  gcc -fopen -o dfs dfs10.c
-//  run:      ./dfs probability
+//  compile:  gcc -fopenmp -o seq sequential1.c
+//  run:      ./seq seedType probability
 // this version changes the Node map back to a non-pointer to enable new seeded maps
 
-#define L 16             /* Linear edge dimension of map */
+#define L 8             /* Linear edge dimension of map */
 #define N L*L           // total number of nodes in a single map
 #define NTHREADS 4
 
@@ -145,7 +145,6 @@ void seedBond(double probability)
 
                         r1 = (double)rand()/RAND_MAX*1.0;
                         r2 = (double)rand()/RAND_MAX*1.0;
-                        //printf("pr: %f\t", r);                                //check print of probability values
                         if (r1>probability) seeded1 = 2;
                         else seeded1 = 0;
                         if (r2>probability) seeded2 = 2;
@@ -153,12 +152,21 @@ void seedBond(double probability)
 
                         map[i][j].right = seeded1;
 						if (j+1 < L) map[i][j+1].left = seeded1;
+						if (map[i][j].right == 0) {
+							map[i][j].flag = 1;
+							if (j+1 < L) map[i][j+1].flag = 1;
+						}
 
                         map[i][j].down = seeded2;
 						if (i+1 < L) map[i+1][j].up = seeded2;
+						if (map[i][j].down == 0) {
+							map[i][j].flag = 1;
+							if (i+1 < L) map[i+1][j].flag = 1;
+						}
 
                         map[i][j].x = j;
                         map[i][j].y = i;
+
 
 /*the following indicates that the top row of the group need not search up, and the bottom not search down, likewise left column need not search left or right column search right.*/
 
@@ -178,18 +186,9 @@ void seedBond(double probability)
         //printf("\n");
         }
 
-        for (i = 0; i < L; i++){  	                    //rows
-                for (j = 0; j < L; j++){                //columns
-					if (map[i][j].right == 0 || map[i][j].down == 0)
-                        map[i][j].flag = 1;
-					if (map[i][j].left == 0 || map[i][j].up == 0)
-                        map[i][j].flag = 1;
-				}
-		}
-
 }
 
-void printBonds(){
+void printSites(){
 
         int i,j;
         for (i = 0; i < (L); i++){
@@ -214,6 +213,26 @@ void printBonds(){
                 printf("\n");
         }
 }
+void printBonds(){
+
+        int i,j;
+        for (i = 0; i < (L); i++){
+                for (j = 0; j < L; j++){
+                        if (map[i][j].right==0){
+                                printf("%i ----- ", map[i][j].flag);
+						}
+                                else printf("%i\t", map[i][j].flag);
+
+                }
+                printf("\n");
+                for (j = 0; j < L; j++){
+                        if (map[i][j].down==0) printf("|\t");
+                        else printf("\t");
+                }
+                printf("\n");
+        }
+}
+
 
 // helper functions for depth first search
 
@@ -494,6 +513,8 @@ void matchClusters(struct Combination combination){
 		if (interface[n].size > max) max = interface[n].size;
 	}
 
+	printf("Lattice size = %i x %i \n\n", L*2, L*2);
+
 	printf("columns percolated = %c \n", cols);
 	printf("rows percolated = %c \n", rows);
 	printf("both percolated = %c \n", both);
@@ -530,9 +551,14 @@ void searchControl(double probability, char seedType){
 			//#pragma omp for private(clusterID, i, j, n, m, k, t, row, column, combination, size)
             for (k = 0; k<NTHREADS; k++)
             {
-				if (seedType == 's') seedSite(probability);
-				else seedBond(probability);
-               	printBonds();
+				if (seedType == 's') {
+					seedSite(probability);
+					printSites();
+				}
+				else {
+					seedBond(probability);
+	               	printBonds();
+				}
 
                 //#pragma omp parallel  //for num_threads(4)
                 //
@@ -691,10 +717,10 @@ void searchControl(double probability, char seedType){
 
 int main(int argc, char *argv[]){
 
-    if(argc != 4)
+    if(argc != 3)
     {
-        fprintf(stderr, " ERROR\n Usage: ./perc seedType probability percolationType\n");
-										// example: "./perc s 0.55 0"  
+        fprintf(stderr, " ERROR\n Usage: ./perc seedType probability\n");
+					// example: "./perc s 0.55"  
         exit(EXIT_FAILURE);             // Exit program indicating failure
     }
     else
