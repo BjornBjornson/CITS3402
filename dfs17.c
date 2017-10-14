@@ -460,16 +460,18 @@ int combi(struct node_cluster **all_clusters,struct node_cluster **second_cluste
 	printf("HEREHREHREHEHHHHEEEEEEEEEEEEEH%i\n",BB[0][1]);
 	for(int Z =0; Z<L;Z++){ // you can see that this should be iterated across all sides.
 		int place=BB[0][Z];
-		printf("%i",place);
+		printf("%i PLACE\n",place);
 		struct node_cluster *link;
 		HASH_FIND_INT(link_B, &place, link);
 		printf("ding");
 		if(link!=NULL){
 		printf("\nIF0\n");
 			while(link->parent!=link->id){
+				printf("A");
 			int start = link->parent;
 			HASH_FIND_INT(superclusters, &start, link);
 			}
+			printf("B");
 			BB[0][Z]=link->id;
 		}
 		else{
