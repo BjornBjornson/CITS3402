@@ -1,0 +1,233 @@
+
+Lattice size = 64 x 64
+
+columns percolated = n
+rows percolated = y
+both percolated = n
+
+Percolated cluster size = 1616
+
+time=0.0307040000
+
+------------------------------------------------------------
+
+Lattice size = 64 x 64
+
+columns percolated = y
+rows percolated = n
+both percolated = n
+
+Percolated cluster size = 1276
+
+time=0.0372190000
+
+--------------------------------------------------------------
+
+Lattice size = 64 x 64
+
+columns percolated = y
+rows percolated = y
+both percolated = y
+
+Percolated cluster size = 2971
+
+time=0.0344290000
+
+--------------------------------------------------------------
+
+Lattice size = 64 x 64
+
+columns percolated = y
+rows percolated = y
+both percolated = y
+
+Percolated cluster size = 2707
+
+time=0.0274950000
+--------------------------------------------------------------
+Lattice size = 64 x 64
+
+columns percolated = y
+rows percolated = y
+both percolated = y
+
+Percolated cluster size = 3208
+
+time=0.0312320000
+---------------------------------------------------------------
+
+Lattice size = 128 x 128
+
+columns percolated = n
+rows percolated = n
+both percolated = n
+
+Lattice did not percolate. Maximum cluster size = 3456
+
+time=0.0836380000
+--------------------------------------------------------------
+Lattice size = 128 x 128
+
+columns percolated = n
+rows percolated = n
+both percolated = n
+
+Lattice did not percolate. Maximum cluster size = 3450
+
+time=0.0875910000
+-------------------------------------------------------------
+
+Lattice size = 128 x 128
+
+columns percolated = n
+rows percolated = n
+both percolated = n
+
+Lattice did not percolate. Maximum cluster size = 3119
+
+time=0.1015940000
+------------------------------------------------------------
+Lattice size = 128 x 128
+
+columns percolated = y
+rows percolated = y
+both percolated = y
+
+Percolated cluster size = 13054
+
+time=0.0953790000
+-------------------------------------------------------------
+Lattice size = 128 x 128
+
+columns percolated = y
+rows percolated = y
+both percolated = y
+
+Percolated cluster size = 10042
+
+time=0.0938180000
+-------------------------------------------------------------
+Lattice size = 192 x 192
+
+columns percolated = n
+rows percolated = y
+both percolated = n
+
+Percolated cluster size = 14070
+
+time=0.3350800000
+-------------------------------------------------------------
+
+Lattice size = 192 x 192
+
+columns percolated = n
+rows percolated = n
+both percolated = n
+
+Lattice did not percolate. Maximum cluster size = 5778
+
+time=0.2183170000
+
+-------------------------------------------------------------
+Lattice size = 192 x 192
+
+columns percolated = n
+rows percolated = n
+both percolated = n
+
+Lattice did not percolate. Maximum cluster size = 5256
+
+time=0.6392790000
+
+-------------------------------------------------------------
+Lattice size = 192 x 192
+
+columns percolated = y
+rows percolated = n
+both percolated = n
+
+Percolated cluster size = 7993
+
+time=0.2139980000
+-------------------------------------------------------------
+Lattice size = 192 x 192
+
+columns percolated = n
+rows percolated = n
+both percolated = n
+
+Lattice did not percolate. Maximum cluster size = 4942
+
+time=0.1890850000
+-------------------------------------------------------------
+
+Lattice size = 192 x 192
+
+columns percolated = n
+rows percolated = n
+both percolated = n
+
+Lattice did not percolate. Maximum cluster size = 5112
+
+time=0.5385110000
+-------------------------------------------------------------
+Lattice size = 192 x 192
+
+columns percolated = n
+rows percolated = n
+both percolated = n
+
+Lattice did not percolate. Maximum cluster size = 5545
+
+time=0.3015250000
+--------------------------------------------------------------
+Lattice size = 256 x 256
+
+columns percolated = n
+rows percolated = n
+both percolated = n
+
+Lattice did not percolate. Maximum cluster size = 9185
+
+time=2.2332680000
+-----------------------------------------------------------------
+Lattice size = 256 x 256
+
+columns percolated = n
+rows percolated = n
+both percolated = n
+
+Lattice did not percolate. Maximum cluster size = 8318
+
+time=1.2662760000
+----------------------------------------------------------------------
+Lattice size = 256 x 256
+
+columns percolated = n
+rows percolated = y
+both percolated = n
+
+Percolated cluster size = 17683
+
+time=1.2045520000
+------------------------------------------------------------
+Lattice size = 256 x 256
+
+columns percolated = n
+rows percolated = n
+both percolated = n
+
+Lattice did not percolate. Maximum cluster size = 8399
+
+time=1.5804690000
+---------------------------------------------------------------------
+Lattice size = 256 x 256
+
+columns percolated = y
+rows percolated = y
+both percolated = y
+
+Percolated cluster size = 33083
+
+time=1.3370140000
+--------------------------------------------------------------------
