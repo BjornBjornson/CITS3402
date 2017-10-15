@@ -9,7 +9,7 @@
 //  run:      ./seq seedType probability
 // this version changes the Node map back to a non-pointer to enable new seeded maps
 
-#define L 8             /* Linear edge dimension of map */
+#define L 128             /* Linear edge dimension of map */
 #define N L*L           // total number of nodes in a single map
 #define NTHREADS 4
 
@@ -53,6 +53,7 @@ struct Combination{
 	int bSize;
 	int cSize;
 	int dSize;
+	int maxSize;
 };
 
 // Initialising the side arrays to 0-empty. Will be filled with clusterID numbers as they are found during the search/navigation.
@@ -520,7 +521,7 @@ void matchClusters(struct Combination combination){
 	printf("both percolated = %c \n", both);
 
 	if (cols == 'y' || rows == 'y') printf("\nPercolated cluster size = %i \n", size);
-	else printf("\nLattice did not percolate. Maximum cluster size = %i\n", max);
+	else printf("\nLattice did not percolate. Maximum cluster size = %i\n", combination.maxSize);
 
 	printf("\n");
 }
@@ -528,6 +529,7 @@ void matchClusters(struct Combination combination){
 void searchControl(double probability, char seedType){
 
             int dfs, size;
+			int maxSize = 0;
 
 			struct Combination combination;
 
@@ -584,6 +586,7 @@ void searchControl(double probability, char seedType){
 													perc[clusterID-2].size = dfs;
 												    perc[clusterID-2].rows = row;
 												    perc[clusterID-2].cols = column;
+													if  (perc[clusterID-2].size > maxSize) maxSize = perc[clusterID-2].size;
 										clusterID++;
                                 }
                         }
@@ -641,6 +644,7 @@ void searchControl(double probability, char seedType){
 					}
 				}
 				
+				combination.maxSize = maxSize;
 				switch(k){
 				case (0):
                 for (t = 0;t<L;t++){
